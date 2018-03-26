@@ -26,7 +26,7 @@ public class Main {
    */
   public static void main(String[] args) throws IOException {
     long t = System.currentTimeMillis();
-    Collection<Cell> cells = Phase1CellGeneration.generateSquareBoard(5, 5);
+    Collection<Cell> cells = Phase1CellGeneration.generateSquareBoard(50, 50);
     System.out.println("Phase 1 " + (System.currentTimeMillis() - t));
     
     t = System.currentTimeMillis();

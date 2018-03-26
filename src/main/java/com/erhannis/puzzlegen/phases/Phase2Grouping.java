@@ -64,6 +64,7 @@ public class Phase2Grouping {
         done.add(source);
         continue;
       }
+      //TODO Since isCellComplete calls getNeighborsAvailableForExpansion, there's some duplication of processing
       ArrayList<Cell> neighbors = new ArrayList<>(getNeighborsAvailableForExpansion.apply(source));
       Cell target = neighbors.get(rand.nextInt(neighbors.size()));
       Group g = c2g.get(source);
