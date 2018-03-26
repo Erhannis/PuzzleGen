@@ -5,6 +5,7 @@
  */
 package com.erhannis.puzzlegen;
 
+import com.erhannis.puzzlegen.phases.Phase1CellGeneration;
 import com.erhannis.puzzlegen.phases.Phase4GenSvg;
 import com.erhannis.puzzlegen.structure.Cell;
 import java.io.File;
@@ -22,7 +23,7 @@ public class Main {
    */
   public static void main(String[] args) throws IOException {
     long t = System.currentTimeMillis();
-    Collection<Cell> cells = CellGenerator.generateSquareBoard(5, 5);
+    Collection<Cell> cells = Phase1CellGeneration.generateSquareBoard(5, 5);
     System.out.println("Phase 1 " + (System.currentTimeMillis() - t));
     t = System.currentTimeMillis();
     Phase4GenSvg.writeGridToSvg(cells.stream().findAny().get(), new File("test.svg"));

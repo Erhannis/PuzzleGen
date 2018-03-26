@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.erhannis.puzzlegen;
+package com.erhannis.puzzlegen.phases;
 
 import com.erhannis.mathnstuff.FactoryHashMap;
 import com.erhannis.mathnstuff.utils.BagMap;
@@ -21,7 +21,7 @@ import org.apache.commons.lang3.ArrayUtils;
  * Contains a variety of methods for generating cells.
  * @author erhannis
  */
-public class CellGenerator {
+public class Phase1CellGeneration {
  public static Collection<Cell> generateSquareBoard(int w, int h) {
    ListMap<Double, Vertex> vertices = new ListMap<>(new FactoryHashMap<List<Double>, Vertex>((input) -> {
      return new Vertex(ArrayUtils.toPrimitive(input.toArray(new Double[0])));
