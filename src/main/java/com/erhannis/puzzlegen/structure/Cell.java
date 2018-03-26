@@ -6,17 +6,45 @@
 package com.erhannis.puzzlegen.structure;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- *
+ * Cells contain and are defined by faces.<br/>
+ * Faces contain and are defined by vertices.<br/>
+ * Vertices contain and are defined by coordinates.<br/>
+ * <br/>
+ * For convenience, each of the three reference the other two.<br/>
+ * <br/>
+ * Create vertices, then faces, then cells.<br/>
+ * 
  * @author erhannis
  */
 public class Cell {
-  public ArrayList<Face> faces = new ArrayList<>(); // Definitional
-  public ArrayList<Vertex> vertices = new ArrayList<>(); // Redundant
+  /** Definitional */
+  public HashSet<Face> faces = new HashSet<>();
+  
+  /** Redundant */
+  public HashSet<Vertex> vertices = new HashSet<>();
+  
+  /**
+   * Creates a cell composed of these faces.
+   * Updates the faces and vertices with a reference to itself.
+   * 
+   * @param faces 
+   */
+  public Cell(Face... faces) {
+    this.faces.addAll(Arrays.asList(faces));
+    this.vertices.addAll(this.faces.stream().flatMap(f -> f.vertices.stream()).collect(Collectors.toList()));
+    for (Face f : this.faces) {
+      f.cells.add(this);
+    }
+    for (Vertex v : this.vertices) {
+      v.cells.add(this);
+    }
+  }
   
   public Set<Cell> getAdjacentNeighbors() {
     Set<Cell> result = faces.stream().flatMap(f -> f.cells.stream()).collect(Collectors.toSet());

@@ -6,14 +6,19 @@
 package com.erhannis.puzzlegen.structure;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  *
+ * @see Cell
  * @author erhannis
  */
 public class Vertex {
-  public ArrayList<Cell> cells = new ArrayList<>(); // Redundant
-  public ArrayList<Face> faces = new ArrayList<>(); // Redundant
+  /** Redundant */
+  public HashSet<Cell> cells = new HashSet<>();
+
+  /** Redundant */
+  public HashSet<Face> faces = new HashSet<>();
   
   public double[] coords;
   

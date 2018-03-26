@@ -7,6 +7,10 @@ package com.erhannis.puzzlegen.structure;
 
 /**
  * This class represents a structure of cells, duplicated in dim N+1 in layers.
+ * 
+ * ...Having possibly determined that this will be possible to implement later
+ * without totally overhauling everything, I'm going to leave it until later.
+ * 
  * @author erhannis
  */
 public class Multilayer {

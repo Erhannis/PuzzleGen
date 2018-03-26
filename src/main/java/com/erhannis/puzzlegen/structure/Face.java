@@ -6,12 +6,25 @@
 package com.erhannis.puzzlegen.structure;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
- *
+ * 
+ * @see Cell
  * @author erhannis
  */
 public class Face {
-  public ArrayList<Cell> cells = new ArrayList<>(); // Redundant
-  public ArrayList<Vertex> vertices = new ArrayList<>(); // Definitional
+  /** Redundant */
+  public HashSet<Cell> cells = new HashSet<>();
+  
+  /** Definitional */
+  public HashSet<Vertex> vertices = new HashSet<>();
+  
+  public Face(Vertex... vertices) {
+    this.vertices.addAll(Arrays.asList(vertices));
+    for (Vertex v : vertices) {
+      v.faces.add(this);
+    }
+  }
 }
