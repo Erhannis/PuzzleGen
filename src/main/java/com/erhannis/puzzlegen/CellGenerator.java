@@ -10,5 +10,5 @@ package com.erhannis.puzzlegen;
  * @author erhannis
  */
 public class CellGenerator {
-  public 
+ 
 }
