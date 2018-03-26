@@ -125,6 +125,7 @@ public class Phase4GenSvg {
   }
   
   protected static void writeSvg(SVGGraphics2D g, File out) throws IOException {
+    out.getParentFile().mkdirs();
     boolean useCSS = true;
     BufferedWriter bw = new BufferedWriter(new FileWriter(out));
     g.stream(bw, useCSS);

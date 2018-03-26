@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
  * @author erhannis
  */
 public class Phase2Grouping {
-  public static Set<Group> groupCellsDefault(Cell root) {
-    final int GROUP_COUNT = 5;
+  public static Set<Group> groupCellsDefault(Cell root, int groupCount) {
+    final int GROUP_COUNT = groupCount;
     SecureRandom rand = new SecureRandom();
     
     Set<Group> groups = new HashSet<>();

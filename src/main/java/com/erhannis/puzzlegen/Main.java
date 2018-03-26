@@ -30,12 +30,12 @@ public class Main {
     System.out.println("Phase 1 " + (System.currentTimeMillis() - t));
     
     t = System.currentTimeMillis();
-    Set<Group> groups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get());
+    Set<Group> groups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), 15);
     System.out.println("Phase 2 " + (System.currentTimeMillis() - t));
     
     t = System.currentTimeMillis();
-    Phase4GenSvg.writeGridToSvg(cells.stream().findAny().get(), new File("target/grid.svg"));
-    Phase4GenSvg.writeGroupsToSvg(groups, new File("target/groups.svg"));
+    Phase4GenSvg.writeGridToSvg(cells.stream().findAny().get(), new File("gen/" + System.currentTimeMillis() + "_grid.svg"));
+    Phase4GenSvg.writeGroupsToSvg(groups, new File("gen/" + System.currentTimeMillis() + "_groups.svg"));
     System.out.println("Phase 4 " + (System.currentTimeMillis() - t));
   }
 }
