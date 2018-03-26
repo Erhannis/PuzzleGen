@@ -5,10 +5,13 @@
  */
 package com.erhannis.puzzlegen.structure;
 
+import com.erhannis.mathnstuff.MeMath;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -56,5 +59,37 @@ public class Cell {
     Set<Cell> result = vertices.stream().flatMap(v -> v.cells.stream()).collect(Collectors.toSet());
     result.remove(this);
     return result;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(faces);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Cell)) {
+      return false;
+    }
+    return Objects.equals(this.faces, ((Cell)obj).faces);
+  }
+
+  @Override
+  public String toString() {
+    //TODO Could export
+    Function<double[], Double> norm = a -> {
+      double sum = 0;
+      for (double d : a) {
+        sum += d * d;
+      }
+      return sum;
+    };
+    Vertex m = null;
+    for (Vertex v : this.vertices) {
+      if (m == null || norm.apply(v.coords) < norm.apply(m.coords)) {
+        m = v;
+      }
+    }
+    return "(c [" + m.coords[0] + ", " + m.coords[1] + "])"; //To change body of generated methods, choose Tools | Templates.
   }
 }

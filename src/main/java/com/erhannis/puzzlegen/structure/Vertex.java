@@ -7,6 +7,7 @@ package com.erhannis.puzzlegen.structure;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Objects;
 
 /**
  *
@@ -24,5 +25,20 @@ public class Vertex {
   
   public Vertex(double... coords) {
     this.coords = coords.clone();
+  }
+  
+  @Override
+  public int hashCode() {
+    //Note that there are arguments to be made about "cells", etc. but I am
+    //  currently choosing to dismiss them.
+    return Objects.hash(coords);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Vertex)) {
+      return false;
+    }
+    return Objects.deepEquals(this.coords, ((Vertex)obj).coords);
   }
 }

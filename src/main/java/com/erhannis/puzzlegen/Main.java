@@ -6,11 +6,14 @@
 package com.erhannis.puzzlegen;
 
 import com.erhannis.puzzlegen.phases.Phase1CellGeneration;
+import com.erhannis.puzzlegen.phases.Phase2Grouping;
 import com.erhannis.puzzlegen.phases.Phase4GenSvg;
 import com.erhannis.puzzlegen.structure.Cell;
+import com.erhannis.puzzlegen.structure.Group;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Set;
 
 /**
  *
@@ -25,8 +28,14 @@ public class Main {
     long t = System.currentTimeMillis();
     Collection<Cell> cells = Phase1CellGeneration.generateSquareBoard(5, 5);
     System.out.println("Phase 1 " + (System.currentTimeMillis() - t));
+    
     t = System.currentTimeMillis();
-    Phase4GenSvg.writeGridToSvg(cells.stream().findAny().get(), new File("test.svg"));
+    Set<Group> groups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get());
+    System.out.println("Phase 2 " + (System.currentTimeMillis() - t));
+    
+    t = System.currentTimeMillis();
+    Phase4GenSvg.writeGridToSvg(cells.stream().findAny().get(), new File("target/grid.svg"));
+    Phase4GenSvg.writeGroupsToSvg(groups, new File("target/groups.svg"));
     System.out.println("Phase 4 " + (System.currentTimeMillis() - t));
   }
 }
