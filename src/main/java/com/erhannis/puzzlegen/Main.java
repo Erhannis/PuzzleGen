@@ -56,8 +56,8 @@ public class Main {
     t = System.currentTimeMillis();
     long time = System.currentTimeMillis();
     Phase4GenSvg.writeGridToSvg(cells.stream().findAny().get(), new File("gen/" + time + "_grid.svg"));
-    Phase4GenSvg.writeGroupsToSvg(groups, new File("gen/" + time + "_groups.svg"), false);
-    Phase4GenSvg.writeGroupsToSvg(groups, new File("gen/" + time + "_groups_colored.svg"), true);
+    Phase4GenSvg.writeGroupsToSvg(groups, new File("gen/" + time + "_groups.svg"), false, true);
+    Phase4GenSvg.writeGroupsToSvg(groups, new File("gen/" + time + "_groups_colored.svg"), true, true);
     System.out.println("Phase 4 " + (System.currentTimeMillis() - t));
   }
 }

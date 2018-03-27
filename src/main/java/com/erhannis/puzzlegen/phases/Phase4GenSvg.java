@@ -64,7 +64,7 @@ public class Phase4GenSvg {
     writeSvg(g, target);
   }
   
-  public static void writeGroupsToSvg(Set<Group> groups, File target, boolean color) throws IOException {
+  public static void writeGroupsToSvg(Set<Group> groups, File target, boolean color, boolean skipUnassignedBorderFaces) throws IOException {
     SVGGraphics2D g = getSvgGraphics2D();
     
     // Draw stuff
@@ -101,11 +101,16 @@ public class Phase4GenSvg {
     });
     HashSet<Face> facesToDraw = new HashSet<>();
     final int EXPECTED_CELLS = 2; // This is probably true across all dimensions, really
+    final int BORDER_EXPECTED_CELLS = 1; // Likewise
     for (Face f : faces) {
       boolean markedGroup = false;
       Group group = null;
       if (f.cells.size() != EXPECTED_CELLS) {
-        facesToDraw.add(f);
+        if (skipUnassignedBorderFaces && f.cells.size() == BORDER_EXPECTED_CELLS && c2g.get(f.cells.iterator().next()) == null) {
+          // Skip
+        } else {
+          facesToDraw.add(f);
+        }
       } else {
         for (Cell c : f.cells) {
           if (!markedGroup) {
