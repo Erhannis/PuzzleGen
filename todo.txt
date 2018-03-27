@@ -1,0 +1,11 @@
+UI
+  Allow user to tweak grouping
+  Allow command line usage?
+
+Implement "min group size" and check
+Multilayer
+Generic layout constraints, check after each change?
+On bad config, nuke small radius and regenerate it?
+  Have to check constraints, could end up with bunch of tiny group fragments
+DeLaunay triangulation
+Hyperbolic geometry

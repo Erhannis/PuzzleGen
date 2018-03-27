@@ -129,6 +129,7 @@ public class Phase1CellGeneration {
 //       w = (row * 2) + 1;
 //       colOffset = -row;
         //TODO Deal with this
+        throw new RuntimeException("Non-square hex board not yet implemented");
       }
       for (int col = colOffset; col < w + colOffset; col++) {
         double x = (col * 1.5) * FACTOR;

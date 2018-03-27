@@ -27,8 +27,9 @@ public class Main {
    */
   public static void main(String[] args) throws IOException {
     long t = System.currentTimeMillis();
-    //Collection<Cell> cells = Phase1CellGeneration.generateSquareBoard(50, 50);
-    Collection<Cell> cells = Phase1CellGeneration.generateHexBoard(60, 40, true);
+    Collection<Cell> cells = Phase1CellGeneration.generateSquareBoard(100, 100);
+    //Collection<Cell> cells = Phase1CellGeneration.generateTriangleBoard(160, 80, true);
+    //Collection<Cell> cells = Phase1CellGeneration.generateHexBoard(120, 80, true);
     System.out.println("Phase 1 " + (System.currentTimeMillis() - t));
     
     t = System.currentTimeMillis();
@@ -36,7 +37,7 @@ public class Main {
     Set<Group> groups = null;
     for (int i = 0; i < 1; i++) {
       System.err.print(i + " ");
-      Set<Group> lGroups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), 10, 0, Phase2Grouping.P2ResolutionMode.MAKE_OWN_GROUP_WITH_MIN_SIZE_20_ELSE_ASSIGN_TO_LEAST_CONTACT_SAVE_BORDER);
+      Set<Group> lGroups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), 80, 1, Phase2Grouping.P2ResolutionMode.MAKE_OWN_GROUP_WITH_MIN_SIZE_20_ELSE_ASSIGN_TO_LEAST_CONTACT_SAVE_BORDER);
       System.err.println("");
       HashSet<Cell> lCells = new HashSet<Cell>();
       for (Group g : lGroups) {
@@ -56,8 +57,8 @@ public class Main {
     t = System.currentTimeMillis();
     long time = System.currentTimeMillis();
     Phase4GenSvg.writeGridToSvg(cells.stream().findAny().get(), new File("gen/" + time + "_grid.svg"));
-    Phase4GenSvg.writeGroupsToSvg(groups, new File("gen/" + time + "_groups.svg"), false, true);
-    Phase4GenSvg.writeGroupsToSvg(groups, new File("gen/" + time + "_groups_colored.svg"), true, true);
+    Phase4GenSvg.writeGroupsToSvg(groups, new File("gen/" + time + "_groups.svg"), Phase4GenSvg.ColorMode.NONE, true);
+    Phase4GenSvg.writeGroupsToSvg(groups, new File("gen/" + time + "_groups_colored.svg"), Phase4GenSvg.ColorMode.RANDOM, true);
     System.out.println("Phase 4 " + (System.currentTimeMillis() - t));
   }
 }

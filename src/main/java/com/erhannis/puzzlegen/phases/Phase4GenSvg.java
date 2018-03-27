@@ -33,6 +33,10 @@ import org.w3c.dom.Document;
  * @author erhannis
  */
 public class Phase4GenSvg {
+  public static enum ColorMode {
+    NONE, RANDOM, WHITE
+  }
+  
   public static void writeGridToSvg(Cell root, File target) throws IOException {
     SVGGraphics2D g = getSvgGraphics2D();
     
@@ -64,7 +68,7 @@ public class Phase4GenSvg {
     writeSvg(g, target);
   }
   
-  public static void writeGroupsToSvg(Set<Group> groups, File target, boolean color, boolean skipUnassignedBorderFaces) throws IOException {
+  public static void writeGroupsToSvg(Set<Group> groups, File target, ColorMode colorMode, boolean skipUnassignedBorderFaces) throws IOException {
     SVGGraphics2D g = getSvgGraphics2D();
     
     // Draw stuff
@@ -74,11 +78,23 @@ public class Phase4GenSvg {
     //TODO Extract this in some way
     HashMap<Cell, Group> c2g = new HashMap<>();
     for (Group group : groups) {
-      Color colr = new Color(rand.nextInt());
+      Color color;
+      switch (colorMode) {
+        case RANDOM:
+          color = new Color(rand.nextInt());
+          break;
+        case WHITE:
+          color = new Color(0xFFFFFF);
+          break;
+        case NONE:
+        default:
+          color = null;
+          break;
+      }
       for (Cell c : group.cells) {
         c2g.put(c, group);
-        if (color) {
-          g.setColor(colr);
+        if (color != null) {
+          g.setColor(color);
           float[] xPoints = new float[c.vertices.size()];
           float[] yPoints = new float[c.vertices.size()];
           int i = 0;
@@ -92,7 +108,7 @@ public class Phase4GenSvg {
         }
       }
     }
-    if (color) {
+    if (colorMode != ColorMode.NONE) {
       g.setColor(Color.BLACK);
     }
     HashSet<Face> faces = new HashSet<>();
