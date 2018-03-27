@@ -48,9 +48,14 @@ public class Cell {
       v.cells.add(this);
     }
   }
+
+  public Set<Cell> getAdjacentNeighborsAndSelf() {
+    Set<Cell> result = faces.stream().flatMap(f -> f.cells.stream()).collect(Collectors.toSet());
+    return result;
+  }
   
   public Set<Cell> getAdjacentNeighbors() {
-    Set<Cell> result = faces.stream().flatMap(f -> f.cells.stream()).collect(Collectors.toSet());
+    Set<Cell> result = getAdjacentNeighborsAndSelf();
     result.remove(this);
     return result;
   }

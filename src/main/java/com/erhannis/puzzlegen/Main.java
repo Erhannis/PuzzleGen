@@ -28,7 +28,7 @@ public class Main {
   public static void main(String[] args) throws IOException {
     long t = System.currentTimeMillis();
     //Collection<Cell> cells = Phase1CellGeneration.generateSquareBoard(50, 50);
-    Collection<Cell> cells = Phase1CellGeneration.generateTriangleBoard(20, 20, true);
+    Collection<Cell> cells = Phase1CellGeneration.generateTriangleBoard(100, 50, true);
     System.out.println("Phase 1 " + (System.currentTimeMillis() - t));
     
     t = System.currentTimeMillis();
@@ -36,7 +36,7 @@ public class Main {
     Set<Group> groups = null;
     for (int i = 0; i < 1; i++) {
       System.err.print(i + " ");
-      Set<Group> lGroups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), 1);
+      Set<Group> lGroups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), 10, 3);
       System.err.println("");
       HashSet<Cell> lCells = new HashSet<Cell>();
       for (Group g : lGroups) {

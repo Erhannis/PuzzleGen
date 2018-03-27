@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * @author erhannis
  */
 public class Phase2Grouping {
-  public static Set<Group> groupCellsDefault(Cell root, int groupCount) {
+  public static Set<Group> groupCellsDefault(Cell root, int groupCount, int ignoreSourceNeighborRadius) {
     final int GROUP_COUNT = groupCount;
     SecureRandom rand = new SecureRandom();
     
@@ -48,7 +48,19 @@ public class Phase2Grouping {
       Set<Cell> adjNs = c.getAdjacentNeighbors();
       Set<Cell> result = adjNs;
       result = result.stream().filter(c2 -> !c2g.containsKey(c2)).collect(Collectors.toSet()); // Remove grouped
-      result = result.stream().filter(c2 -> !(c2.getAllNeighbors().stream().filter(c2n -> !adjNs.contains(c2n) && !c2n.equals(c)).anyMatch(c2n -> c2g.get(c2n) == c2g.get(c)))).collect(Collectors.toSet()); // Remove if too close to own group, ignoring adj from c
+      Set<Cell> ignore0;
+      if (ignoreSourceNeighborRadius <= 0) {
+        ignore0 = new HashSet<Cell>();
+      } else {
+        ignore0 = adjNs.stream().filter(c2 -> c2g.get(c2) == c2g.get(c)).collect(Collectors.toSet());
+        int i = ignoreSourceNeighborRadius - 1;
+        while (i > 0) {
+          ignore0 = ignore0.stream().flatMap(c2 -> c2.getAdjacentNeighborsAndSelf().stream()).filter(c2 -> c2g.get(c2) == c2g.get(c)).collect(Collectors.toSet());
+          i--;
+        }
+      }
+      Set<Cell> ignore = ignore0;
+      result = result.stream().filter(c2 -> !(c2.getAllNeighbors().stream().filter(c2n -> !ignore.contains(c2n) && !c2n.equals(c)).anyMatch(c2n -> c2g.get(c2n) == c2g.get(c)))).collect(Collectors.toSet()); // Remove if too close to own group, ignoring adj from c
       return result;
     };
     
