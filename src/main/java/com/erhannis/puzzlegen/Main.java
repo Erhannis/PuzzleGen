@@ -13,6 +13,7 @@ import com.erhannis.puzzlegen.structure.Group;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -26,11 +27,30 @@ public class Main {
    */
   public static void main(String[] args) throws IOException {
     long t = System.currentTimeMillis();
-    Collection<Cell> cells = Phase1CellGeneration.generateSquareBoard(50, 50);
+    //Collection<Cell> cells = Phase1CellGeneration.generateSquareBoard(50, 50);
+    Collection<Cell> cells = Phase1CellGeneration.generateTriangleBoard(10, 10, false);
     System.out.println("Phase 1 " + (System.currentTimeMillis() - t));
     
     t = System.currentTimeMillis();
-    Set<Group> groups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), 15);
+    int bestCount = 0;
+    Set<Group> groups = null;
+    for (int i = 0; i < 1; i++) {
+      System.err.print(i + " ");
+      Set<Group> lGroups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), 1);
+      System.err.println("");
+      HashSet<Cell> lCells = new HashSet<Cell>();
+      for (Group g : lGroups) {
+        lCells.addAll(g.cells);
+      }
+      if (lCells.size() > bestCount) {
+        groups = lGroups;
+        bestCount = lGroups.size();
+      }
+      if (lCells.size() == cells.size()) {
+        System.out.println("Found ideal candidate, breaking early");
+        break;
+      }
+    }
     System.out.println("Phase 2 " + (System.currentTimeMillis() - t));
     
     t = System.currentTimeMillis();

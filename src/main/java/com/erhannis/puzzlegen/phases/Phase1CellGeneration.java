@@ -11,8 +11,8 @@ import com.erhannis.mathnstuff.utils.ListMap;
 import com.erhannis.puzzlegen.structure.Cell;
 import com.erhannis.puzzlegen.structure.Face;
 import com.erhannis.puzzlegen.structure.Vertex;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.ArrayUtils;
@@ -45,5 +45,67 @@ public class Phase1CellGeneration {
      }
    }
    return v2c.map.values();
+ }
+
+ public static Collection<Cell> generateTriangleBoard(int w, int h, boolean square) {
+   ListMap<Double, Vertex> vertices = new ListMap<>(new FactoryHashMap<List<Double>, Vertex>((input) -> {
+     return new Vertex(ArrayUtils.toPrimitive(input.toArray(new Double[0])));
+   }));
+   BagMap<Vertex, Face> faces = new BagMap<>(new FactoryHashMap<Set<Vertex>, Face>((input) -> {
+     return new Face(input.toArray(new Vertex[0]));
+   }));
+   HashSet<Cell> cells = new HashSet<>();
+   
+   double phi = Math.sin(Math.PI / 3);
+   int factor = 10;
+   for (int row = 0; row < h; row++) {
+     double y = row * factor * phi;
+     int colOffset = 0;
+     if (!square) {
+       w = (row * 2) + 1;
+       colOffset = -row;
+     }
+     for (int col = colOffset; col < w + colOffset; col++) {
+        double x = col * (factor / 2);
+       
+        Face[] lFaces = new Face[3];
+        double u = factor/2;
+        double u2 = factor;
+        double v = phi*factor;
+       
+        if (row % 2 == 0) {
+          // Leftmost trigangle faces up, from y+1 to y
+          if (col % 2 == 0) {
+            // Same as leftmost: facing up
+            lFaces[0] = faces.get(vertices.get(x, y+v), vertices.get(x+u, y));
+            lFaces[1] = faces.get(vertices.get(x+u, y), vertices.get(x+u2, y+v));
+            lFaces[2] = faces.get(vertices.get(x+u2, y+v), vertices.get(x, y+v));
+          } else {
+            // Opposite from leftmost: facing down
+            lFaces[0] = faces.get(vertices.get(x, y), vertices.get(x+u, y+v));
+            lFaces[1] = faces.get(vertices.get(x+u, y+v), vertices.get(x+u2, y));
+            lFaces[2] = faces.get(vertices.get(x+u2, y), vertices.get(x, y));
+          }
+        } else {
+          // Leftmost triangle faces down, from y to y+1
+          if (col % 2 == 0) {
+            // Same as leftmost: facing down
+            lFaces[0] = faces.get(vertices.get(x, y), vertices.get(x+u, y+v));
+            lFaces[1] = faces.get(vertices.get(x+u, y+v), vertices.get(x+u2, y));
+            lFaces[2] = faces.get(vertices.get(x+u2, y), vertices.get(x, y));
+          } else {
+            // Opposite from leftmost: facing up
+            lFaces[0] = faces.get(vertices.get(x, y+v), vertices.get(x+u, y));
+            lFaces[1] = faces.get(vertices.get(x+u, y), vertices.get(x+u2, y+v));
+            lFaces[2] = faces.get(vertices.get(x+u2, y+v), vertices.get(x, y+v));
+          }
+       }
+       
+       Cell c = new Cell(lFaces);
+       System.out.println(c.toString());
+       cells.add(c);
+     }
+   }
+   return cells;
  }
 }
