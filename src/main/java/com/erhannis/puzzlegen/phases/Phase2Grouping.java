@@ -52,20 +52,16 @@ public class Phase2Grouping {
       return result;
     };
     
-    Function<Cell, Boolean> isCellComplete = c -> {
-      return getNeighborsAvailableForExpansion.apply(c).isEmpty();
-    };
-    
     while (!growing.isEmpty()) {
       int i = rand.nextInt(growing.size());
       Cell source = growing.get(i);
-      if (isCellComplete.apply(source)) {
+      ArrayList<Cell> neighbors = new ArrayList<>(getNeighborsAvailableForExpansion.apply(source));
+      if (neighbors.isEmpty()) {
+        //TODO Perhaps this is slow?
         growing.remove(i);
         done.add(source);
         continue;
       }
-      //TODO Since isCellComplete calls getNeighborsAvailableForExpansion, there's some duplication of processing
-      ArrayList<Cell> neighbors = new ArrayList<>(getNeighborsAvailableForExpansion.apply(source));
       Cell target = neighbors.get(rand.nextInt(neighbors.size()));
       Group g = c2g.get(source);
       g.cells.add(target);
