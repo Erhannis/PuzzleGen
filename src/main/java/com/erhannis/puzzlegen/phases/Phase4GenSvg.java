@@ -9,19 +9,22 @@ import com.erhannis.puzzlegen.structure.Cell;
 import com.erhannis.puzzlegen.structure.Face;
 import com.erhannis.puzzlegen.structure.Group;
 import com.erhannis.puzzlegen.structure.Vertex;
+import java.awt.Color;
+import java.awt.Polygon;
 import java.awt.geom.Line2D;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.batik.dom.GenericDOMImplementation;
+import org.apache.batik.ext.awt.geom.Polygon2D;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
@@ -61,18 +64,36 @@ public class Phase4GenSvg {
     writeSvg(g, target);
   }
   
-  public static void writeGroupsToSvg(Set<Group> groups, File target) throws IOException {
+  public static void writeGroupsToSvg(Set<Group> groups, File target, boolean color) throws IOException {
     SVGGraphics2D g = getSvgGraphics2D();
     
     // Draw stuff
     
+    SecureRandom rand = new SecureRandom();
     // Get faces
     //TODO Extract this in some way
     HashMap<Cell, Group> c2g = new HashMap<>();
     for (Group group : groups) {
+      Color colr = new Color(rand.nextInt());
       for (Cell c : group.cells) {
         c2g.put(c, group);
+        if (color) {
+          g.setColor(colr);
+          float[] xPoints = new float[c.vertices.size()];
+          float[] yPoints = new float[c.vertices.size()];
+          int i = 0;
+          for (Vertex v : c.vertices) {
+            xPoints[i] = (float)v.coords[0];
+            yPoints[i] = (float)v.coords[1];
+            i++;
+          }
+          Polygon2D p = new Polygon2D(xPoints, yPoints, xPoints.length);
+          g.fill(p);
+        }
       }
+    }
+    if (color) {
+      g.setColor(Color.BLACK);
     }
     HashSet<Face> faces = new HashSet<>();
     Utils.forEachCell(groups.iterator().next().cells.iterator().next(), c -> {

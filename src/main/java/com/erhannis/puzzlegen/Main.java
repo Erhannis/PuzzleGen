@@ -28,7 +28,7 @@ public class Main {
   public static void main(String[] args) throws IOException {
     long t = System.currentTimeMillis();
     //Collection<Cell> cells = Phase1CellGeneration.generateSquareBoard(50, 50);
-    Collection<Cell> cells = Phase1CellGeneration.generateTriangleBoard(100, 50, true);
+    Collection<Cell> cells = Phase1CellGeneration.generateTriangleBoard(300, 150, true);
     System.out.println("Phase 1 " + (System.currentTimeMillis() - t));
     
     t = System.currentTimeMillis();
@@ -36,7 +36,7 @@ public class Main {
     Set<Group> groups = null;
     for (int i = 0; i < 1; i++) {
       System.err.print(i + " ");
-      Set<Group> lGroups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), 10, 3);
+      Set<Group> lGroups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), 150, 4);
       System.err.println("");
       HashSet<Cell> lCells = new HashSet<Cell>();
       for (Group g : lGroups) {
@@ -54,8 +54,10 @@ public class Main {
     System.out.println("Phase 2 " + (System.currentTimeMillis() - t));
     
     t = System.currentTimeMillis();
-    Phase4GenSvg.writeGridToSvg(cells.stream().findAny().get(), new File("gen/" + System.currentTimeMillis() + "_grid.svg"));
-    Phase4GenSvg.writeGroupsToSvg(groups, new File("gen/" + System.currentTimeMillis() + "_groups.svg"));
+    long time = System.currentTimeMillis();
+    Phase4GenSvg.writeGridToSvg(cells.stream().findAny().get(), new File("gen/" + time + "_grid.svg"));
+    Phase4GenSvg.writeGroupsToSvg(groups, new File("gen/" + time + "_groups.svg"), false);
+    Phase4GenSvg.writeGroupsToSvg(groups, new File("gen/" + time + "_groups_colored.svg"), true);
     System.out.println("Phase 4 " + (System.currentTimeMillis() - t));
   }
 }
