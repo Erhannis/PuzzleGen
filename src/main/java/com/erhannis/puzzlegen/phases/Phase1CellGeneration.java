@@ -56,7 +56,8 @@ public class Phase1CellGeneration {
    }));
    HashSet<Cell> cells = new HashSet<>();
    
-   double phi = Math.sin(Math.PI / 3);
+   //double phi = Math.sin(Math.PI / 3); // About 0.866
+   double phi = 0.85546875; // Near-ish base 2 representation
    int factor = 10;
    for (int row = 0; row < h; row++) {
      double y = row * factor * phi;
