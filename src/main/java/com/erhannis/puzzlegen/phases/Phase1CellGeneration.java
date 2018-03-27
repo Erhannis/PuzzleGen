@@ -131,7 +131,7 @@ public class Phase1CellGeneration {
         //TODO Deal with this
       }
       for (int col = colOffset; col < w + colOffset; col++) {
-        double x = (col + 0.5) * FACTOR;
+        double x = (col * 1.5) * FACTOR;
 
         Face[] lFaces = new Face[6];
         double u = FACTOR / 2;

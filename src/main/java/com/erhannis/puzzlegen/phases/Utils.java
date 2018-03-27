@@ -5,9 +5,14 @@
  */
 package com.erhannis.puzzlegen.phases;
 
+import com.erhannis.mathnstuff.MeMath;
 import com.erhannis.puzzlegen.structure.Cell;
+import com.erhannis.puzzlegen.structure.Vertex;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -39,5 +44,40 @@ public class Utils {
       
       done.add(c);
     }
+  }
+  
+  /**
+   * Order vertices (counter?)clockwise around their centroid.  Good for filling polygons.
+   * 
+   * Only works in 2D.
+   * 
+   * @param vertices
+   * @return 
+   */
+  public static List<Vertex> orderVertices(Collection<Vertex> vertices) {
+    ArrayList<Vertex> result = new ArrayList<Vertex>();
+    if (vertices.isEmpty()) {
+      return result;
+    }
+    
+    double[] centroid = new double[]{0,0};
+    
+    for (Vertex v : vertices) {
+      centroid[0] += v.coords[0];
+      centroid[1] += v.coords[1];
+    }
+    centroid[0] /= vertices.size();
+    centroid[1] /= vertices.size();
+    
+    result.addAll(vertices);
+    
+    result.sort((a, b) -> {
+      double[] ca = MeMath.vectorSubtract(a.coords, centroid);
+      double ta = Math.atan2(ca[1], ca[0]);
+      double[] cb = MeMath.vectorSubtract(b.coords, centroid);
+      double tb = Math.atan2(cb[1], cb[0]);
+      return Double.compare(ta, tb);
+    });
+    return result;
   }
 }

@@ -82,7 +82,7 @@ public class Phase4GenSvg {
           float[] xPoints = new float[c.vertices.size()];
           float[] yPoints = new float[c.vertices.size()];
           int i = 0;
-          for (Vertex v : c.vertices) {
+          for (Vertex v : Utils.orderVertices(c.vertices)) {
             xPoints[i] = (float)v.coords[0];
             yPoints[i] = (float)v.coords[1];
             i++;
