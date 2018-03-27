@@ -1,7 +1,7 @@
 UI
   Allow user to tweak grouping
-  Allow command line usage?
-
+  ^Allow command line usage?
+Parameterize the min unassigned->spontaneous group size
 Implement "min group size" and check
 Multilayer
 Generic layout constraints, check after each change?

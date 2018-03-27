@@ -91,7 +91,6 @@ public class Main {
         System.out.println("Phase 1 " + (System.currentTimeMillis() - t));
 
         t = System.currentTimeMillis();
-        int bestCount = 0;
         Set<Group> groups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), groupCount, neighborStrictness, resolutionMode);
         System.out.println("Phase 2 " + (System.currentTimeMillis() - t));
 
