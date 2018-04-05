@@ -9,3 +9,10 @@ On bad config, nuke small radius and regenerate it?
   Have to check constraints, could end up with bunch of tiny group fragments
 DeLaunay triangulation
 Hyperbolic geometry
+Turn arbitrary edges into cells
+  Remove whole-board cell
+  ^Basic
+Lindenmayer Systems
+  Alter single-line systems, for making cells
+    Take edge with same cell on both sides, turn one A and the other B, propagate until they collide?  Seed whole map, propagate between traces until collision?
+  ^Generate

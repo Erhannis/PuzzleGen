@@ -55,9 +55,8 @@ public class Utils {
    * @return 
    */
   public static List<Vertex> orderVertices(Collection<Vertex> vertices) {
-    ArrayList<Vertex> result = new ArrayList<Vertex>();
     if (vertices.isEmpty()) {
-      return result;
+      return new ArrayList<Vertex>();
     }
     
     double[] centroid = new double[]{0,0};
@@ -69,12 +68,30 @@ public class Utils {
     centroid[0] /= vertices.size();
     centroid[1] /= vertices.size();
     
+    return orderVertices(vertices, new Vertex(centroid[0], centroid[1]));
+  }
+
+  /**
+   * Order vertices (counter?)clockwise around `center`.  Good for circling cells.
+   * 
+   * Only works in 2D.
+   * 
+   * @param vertices
+   * @param center
+   * @return 
+   */
+  public static List<Vertex> orderVertices(Collection<Vertex> vertices, Vertex center) {
+    ArrayList<Vertex> result = new ArrayList<Vertex>();
+    if (vertices.isEmpty()) {
+      return result;
+    }
+    
     result.addAll(vertices);
     
     result.sort((a, b) -> {
-      double[] ca = MeMath.vectorSubtract(a.coords, centroid);
+      double[] ca = MeMath.vectorSubtract(a.coords, center.coords);
       double ta = Math.atan2(ca[1], ca[0]);
-      double[] cb = MeMath.vectorSubtract(b.coords, centroid);
+      double[] cb = MeMath.vectorSubtract(b.coords, center.coords);
       double tb = Math.atan2(cb[1], cb[0]);
       return Double.compare(ta, tb);
     });

@@ -6,15 +6,26 @@
 package com.erhannis.puzzlegen.phases;
 
 import com.erhannis.mathnstuff.FactoryHashMap;
+import com.erhannis.mathnstuff.Holder;
+import com.erhannis.mathnstuff.MeMath;
 import com.erhannis.mathnstuff.utils.BagMap;
 import com.erhannis.mathnstuff.utils.ListMap;
 import com.erhannis.puzzlegen.structure.Cell;
 import com.erhannis.puzzlegen.structure.Face;
 import com.erhannis.puzzlegen.structure.Vertex;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.ArrayUtils;
 
 /**
@@ -23,6 +34,7 @@ import org.apache.commons.lang3.ArrayUtils;
  * @author erhannis
  */
 public class Phase1CellGeneration {
+
   public static final int FACTOR = 10;
 
   public static Collection<Cell> generateSquareBoard(int w, int h) {
@@ -161,5 +173,177 @@ public class Phase1CellGeneration {
       }
     }
     return cells;
+  }
+
+  public static Collection<Cell> generateSierpinski(int level, boolean dbl) {
+    ListMap<Double, Vertex> vertices = new ListMap<>(new FactoryHashMap<List<Double>, Vertex>((input) -> {
+      return new Vertex(ArrayUtils.toPrimitive(input.toArray(new Double[0])));
+    }));
+    BagMap<Vertex, Face> faces = new BagMap<>(new FactoryHashMap<Set<Vertex>, Face>((input) -> {
+      return new Face(input.toArray(new Vertex[0]));
+    }));
+
+    //TODO Allow customization
+    HashMap<Character, String> rules = new HashMap<>();
+    rules.put('F', "F-G+F+G-F");
+    rules.put('G', "GG");
+    rules.put('+', "+");
+    rules.put('-', "-");
+    String init = "F-G-G";
+    String code = doLSystem(init, rules, level);
+
+    double xf = 10;
+    double yf = xf;
+
+    Holder<Double> x = new Holder<>(0.0);
+    Holder<Double> y = new Holder<>(0.0);
+    Holder<Integer> dir = new Holder<>(0); //n ne e s sw w
+    Holder<Vertex> lastVertex = new Holder<>(null);
+
+    HashMap<Character, Runnable> actions = new HashMap<>();
+    actions.put('F', () -> {
+      //TODO Note that n/s may be backwards, technically
+      switch (dir.value) {
+        case 0: //n
+          y.value += yf;
+          break;
+        case 1: //ne
+          x.value += xf;
+          y.value += yf;
+          break;
+        case 2: //e
+          x.value += xf;
+          break;
+        case 3: //s
+          y.value -= yf;
+          break;
+        case 4: //sw
+          x.value -= xf;
+          y.value -= yf;
+          break;
+        case 5: //w
+          x.value -= xf;
+          break;
+      }
+    });
+    actions.put('G', actions.get('F'));
+    actions.put('+', () -> {
+      dir.value = MeMath.mod(dir.value - 2, 6);
+    });
+    actions.put('-', () -> {
+      dir.value = MeMath.mod(dir.value + 2, 6);
+    });
+
+    // Make faces
+    lastVertex.value = vertices.get(x.value, y.value);
+    code.chars().forEachOrdered(c -> {
+      actions.get((Character) (char) c).run();
+      Vertex thisVertex = vertices.get(x.value, y.value);
+      if (!thisVertex.equals(lastVertex.value)) {
+        faces.get(lastVertex.value, thisVertex);
+        lastVertex.value = thisVertex;
+      }
+    });
+
+    if (dbl) {
+      Collection<Face> halfFaces = new HashSet<Face>(faces.map.values());
+      for (Face f : halfFaces) {
+        Face newFace = faces.get(f.vertices.stream().map(v -> vertices.get(v.coords[1], v.coords[0])).collect(Collectors.toList()).toArray(new Vertex[0]));
+        faces.put(newFace, newFace.vertices.toArray(new Vertex[0]));
+      }
+    }
+
+    return autoCellFaces(faces.map.values(), true);
+  }
+
+  protected static Collection<Cell> autoCellFaces(Collection<Face> faces, boolean removeOutsideCell) {
+    BagMap<Vertex, Face> v2f = new BagMap<>();
+    for (Face f : faces) {
+      v2f.put(f, f.vertices.toArray(new Vertex[0]));
+    }
+    
+    Set<Cell> cells = new HashSet<>();
+
+    Function<Set<Vertex>, Vertex[]> orderPair = (vs) -> {
+      if (vs.size() != 2) {
+        throw new RuntimeException("Trying to order invalid number of vertices: " + vs.size());
+      }
+      Iterator<Vertex> i = vs.iterator();
+      Vertex v1 = i.next();
+      Vertex v2 = i.next();
+      if (v1.coords[0] < v2.coords[0]) {
+        return new Vertex[]{v1, v2};
+      } else if (v1.coords[0] > v2.coords[0]) {
+        return new Vertex[]{v2, v1};
+      } else {
+        if (v1.coords[1] < v2.coords[1]) {
+          return new Vertex[]{v1, v2};
+        } else if (v1.coords[1] > v2.coords[1]) {
+          return new Vertex[]{v2, v1};
+        } else {
+          throw new RuntimeException("Trying to order two identical vertices!");
+        }
+      }
+    };
+
+    //TODO I suspect that this is pretty inefficient, calc cells up to 2*cell.faces.length times.
+    //TODO For each face, run cw until we get back to the same face.  Make that a cell.
+    for (Face f : faces) {
+      Consumer<Boolean> addCell = (reverseDir) -> {
+        HashSet<Face> newFaces = new HashSet<>();
+        Vertex[] pair = orderPair.apply(f.vertices); //TODO Maybe just comparator?
+        Face curFace = f;
+        do {
+          newFaces.add(curFace);
+          List<Vertex> neighbors = Utils.orderVertices(pair[1].getNeighbors(), pair[1]);
+          if (reverseDir) {
+            Collections.reverse(neighbors);
+          }
+          int i = 0;
+          boolean isNext = false;
+          Vertex next = null;
+          for (Vertex n : neighbors) {
+            if (isNext) {
+              next = n;
+              break;
+            }
+            if (n.equals(pair[0])) {
+              isNext = true;
+            }
+          }
+          if (next == null) {
+            if (isNext) {
+              next = neighbors.get(0);
+            } else {
+              throw new RuntimeException("Didn't hit other neighbor?");
+            }
+          }
+          pair[0] = pair[1];
+          pair[1] = next;
+          curFace = v2f.get(pair[0], pair[1]);
+        } while (!curFace.equals(f));
+        cells.add(new Cell(newFaces.toArray(new Face[0])));
+      };
+      addCell.accept(false);
+      addCell.accept(true);
+    }
+
+    if (removeOutsideCell) {
+      // Note that this yields empty set if there's only one cell, and this is expected.
+      //TODO ...Note, also, that this fails to remove the outside cell.
+      return cells.stream().filter(c -> c.faces.stream().anyMatch(f -> f.cells.size() > 1)).collect(Collectors.toSet());
+    } else {
+      return cells;
+    }
+  }
+
+  public static String doLSystem(String init, Map<Character, String> rules, int level) {
+    StringBuilder s = new StringBuilder(init);
+    for (int i = 0; i < level; i++) {
+      StringBuilder r = new StringBuilder();
+      s.chars().forEachOrdered(c -> r.append(rules.get((Character) (char) c)));
+      s = r;
+    }
+    return s.toString();
   }
 }

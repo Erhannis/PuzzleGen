@@ -46,10 +46,11 @@ public class Main {
               + "    groupColorMode - How to color the colored group svg.  One of:\n"
               + "        NONE\n"
               + "        RANDOM\n"
+              + "        RANDOM_WITH_ALPHA\n"
               + "        WHITE\n"
               + "    skipUnassignedBorderFaces - Should the svg rendering attempt to blend border cells into the border?  t or f.");
     };
-    if (args.length >= 0) { // Hotwiring to show usage, for now
+    if (args.length > 0) { // Hotwiring to show usage, for now
       try {
         Collection<Cell> cells;
         int i = 0;
@@ -107,9 +108,11 @@ public class Main {
       }
     } else {
       long t = System.currentTimeMillis();
-      Collection<Cell> cells = Phase1CellGeneration.generateSquareBoard(100, 100);
+      //Collection<Cell> cells = Phase1CellGeneration.generateSquareBoard(100, 100);
       //Collection<Cell> cells = Phase1CellGeneration.generateTriangleBoard(160, 80, true);
       //Collection<Cell> cells = Phase1CellGeneration.generateHexBoard(120, 80, true);
+      Collection<Cell> cells = Phase1CellGeneration.generateSierpinski(7, true);
+      System.out.println("Got " + cells.size() + " cells");
       System.out.println("Phase 1 " + (System.currentTimeMillis() - t));
 
       t = System.currentTimeMillis();
@@ -117,7 +120,7 @@ public class Main {
       Set<Group> groups = null;
       for (int i = 0; i < 1; i++) {
         System.err.print(i + " ");
-        Set<Group> lGroups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), 80, 1, Phase2Grouping.P2ResolutionMode.MAKE_OWN_GROUP_WITH_MIN_SIZE_20_ELSE_ASSIGN_TO_LEAST_CONTACT_SAVE_BORDER);
+        Set<Group> lGroups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), 40, 3, Phase2Grouping.P2ResolutionMode.MAKE_OWN_GROUP_WITH_MIN_SIZE_20_ELSE_ASSIGN_TO_LEAST_CONTACT_SAVE_BORDER);
         System.err.println("");
         HashSet<Cell> lCells = new HashSet<Cell>();
         for (Group g : lGroups) {
@@ -132,13 +135,14 @@ public class Main {
           break;
         }
       }
+      System.out.println("Got " + groups.size() + " groups");
       System.out.println("Phase 2 " + (System.currentTimeMillis() - t));
 
       t = System.currentTimeMillis();
       long time = System.currentTimeMillis();
       Phase4GenSvg.writeGridToSvg(cells.stream().findAny().get(), new File("gen/" + time + "_grid.svg"));
       Phase4GenSvg.writeGroupsToSvg(groups, new File("gen/" + time + "_groups.svg"), Phase4GenSvg.ColorMode.NONE, true);
-      Phase4GenSvg.writeGroupsToSvg(groups, new File("gen/" + time + "_groups_colored.svg"), Phase4GenSvg.ColorMode.RANDOM, true);
+      Phase4GenSvg.writeGroupsToSvg(groups, new File("gen/" + time + "_groups_colored.svg"), Phase4GenSvg.ColorMode.RANDOM_WITH_ALPHA, true);
       System.out.println("Phase 4 " + (System.currentTimeMillis() - t));
     }
   }

@@ -34,7 +34,7 @@ import org.w3c.dom.Document;
  */
 public class Phase4GenSvg {
   public static enum ColorMode {
-    NONE, RANDOM, WHITE
+    NONE, RANDOM, RANDOM_WITH_ALPHA, WHITE
   }
   
   public static void writeGridToSvg(Cell root, File target) throws IOException {
@@ -82,6 +82,9 @@ public class Phase4GenSvg {
       switch (colorMode) {
         case RANDOM:
           color = new Color(rand.nextInt());
+          break;
+        case RANDOM_WITH_ALPHA:
+          color = new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat(), 0.5f);
           break;
         case WHITE:
           color = new Color(0xFFFFFF);
