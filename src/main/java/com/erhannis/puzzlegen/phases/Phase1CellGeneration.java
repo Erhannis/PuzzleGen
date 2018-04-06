@@ -192,7 +192,7 @@ public class Phase1CellGeneration {
     String init = "F-G-G";
     String code = doLSystem(init, rules, level);
 
-    double xf = 10;
+    double xf = FACTOR;
     double yf = xf;
 
     Holder<Double> x = new Holder<>(0.0);
@@ -337,6 +337,77 @@ public class Phase1CellGeneration {
     }
   }
 
+  public static Collection<Cell> generateLSystem(int level) {
+    ListMap<Double, Vertex> vertices = new ListMap<>(new FactoryHashMap<List<Double>, Vertex>((input) -> {
+      return new Vertex(ArrayUtils.toPrimitive(input.toArray(new Double[0])));
+    }));
+    BagMap<Vertex, Face> faces = new BagMap<>(new FactoryHashMap<Set<Vertex>, Face>((input) -> {
+      return new Face(input.toArray(new Vertex[0]));
+    }));
+
+    //TODO Allow customization
+    HashMap<Character, String> rules = new HashMap<>();
+    rules.put('n', "nfbfn-f-bfnfb+f+nfbfn");
+    rules.put('b', "bfnfb+f+nfbfn-f-bfnfb");
+    rules.put('f', "f");
+    rules.put('+', "+");
+    rules.put('-', "-");
+    String init = "n";
+    String code = doLSystem(init, rules, level);
+
+    double xf = FACTOR;
+    double yf = xf;
+
+    Holder<Double> x = new Holder<>(0.0);
+    Holder<Double> y = new Holder<>(0.0);
+    Holder<Integer> dir = new Holder<>(0); //n e s w
+    Holder<Vertex> lastVertex = new Holder<>(null);
+
+    HashMap<Character, Runnable> actions = new HashMap<>();
+    actions.put('n', () -> {});
+    actions.put('b', () -> {});
+    actions.put('f', () -> {
+      //TODO Note that n/s may be backwards, technically
+      switch (dir.value) {
+        case 0: //n
+          y.value += yf;
+          break;
+        case 1: //e
+          x.value += xf;
+          break;
+        case 2: //s
+          y.value -= yf;
+          break;
+        case 3: //w
+          x.value -= xf;
+          break;
+      }
+    });
+    actions.put('+', () -> {
+      dir.value = MeMath.mod(dir.value - 1, 4);
+    });
+    actions.put('-', () -> {
+      dir.value = MeMath.mod(dir.value + 1, 4);
+    });
+
+    // Make faces
+    lastVertex.value = vertices.get(x.value, y.value);
+    code.chars().forEachOrdered(c -> {
+      actions.get((Character) (char) c).run();
+      Vertex thisVertex = vertices.get(x.value, y.value);
+      if (!thisVertex.equals(lastVertex.value)) {
+        faces.get(lastVertex.value, thisVertex);
+        lastVertex.value = thisVertex;
+      }
+    });
+
+    HashSet<Cell> cells = new HashSet<>();
+    Cell c = new Cell(faces.map.values().toArray(new Face[0]));
+    cells.add(c);
+
+    return cells;
+  }
+  
   public static String doLSystem(String init, Map<Character, String> rules, int level) {
     StringBuilder s = new StringBuilder(init);
     for (int i = 0; i < level; i++) {
