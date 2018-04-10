@@ -6,30 +6,38 @@
 package com.erhannis.puzzlegen.phases;
 
 import com.erhannis.mathnstuff.FactoryHashMap;
+import com.erhannis.mathnstuff.utils.BagMap;
+import com.erhannis.mathnstuff.utils.ListMap;
 import com.erhannis.puzzlegen.structure.Cell;
 import com.erhannis.puzzlegen.structure.Face;
 import com.erhannis.puzzlegen.structure.Group;
+import com.erhannis.puzzlegen.structure.Vertex;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  *
  * @author erhannis
  */
 public class Phase2Grouping {
+
   public static enum P2ResolutionMode {
+
     NONE, ASSIGN_TO_LEAST_CONTACT, ASSIGN_TO_LEAST_CONTACT_SAVE_BORDER, MAKE_OWN_GROUP, MAKE_OWN_GROUP_WITH_MIN_SIZE_20_ELSE_ASSIGN_TO_LEAST_CONTACT_SAVE_BORDER
   }
 
   private static final int MIN_RESOLUTION_GROUP_SIZE_FOR_MODE = 20;
-  
+
   public static Set<Group> groupCellsDefault(Cell root, int groupCount, int ignoreSourceNeighborRadius, P2ResolutionMode resolutionMode) {
     final int GROUP_COUNT = groupCount;
     SecureRandom rand = new SecureRandom();
@@ -122,7 +130,7 @@ public class Phase2Grouping {
     };
 
     Group border = new Group(); //TODO ???
-    
+
     BiConsumer<Group, Boolean> assignToLeastContact = (group, skipBorder) -> {
       Set<Face> faces = group.cells.stream().flatMap(c2 -> c2.faces.stream()).collect(Collectors.toSet());
       FactoryHashMap<Group, Integer> scores = new FactoryHashMap<Group, Integer>(g2 -> 0);
@@ -210,5 +218,34 @@ public class Phase2Grouping {
     }
 
     return groups;
+  }
+
+  /**
+   * Splatter paint on grid, expand it outward until it hits other paint, at
+   * which point create an edge.
+   * @param faces
+   * @param groupCount
+   * @param forbidSelfAdjacency
+   * @return 
+   */
+  public static Collection<Cell> splitCellsByPaint(Collection<Face> faces, int groupCount, boolean forbidSelfAdjacency) {
+    ListMap<Double, Vertex> vertices = new ListMap<>(new FactoryHashMap<List<Double>, Vertex>((input) -> {
+      return new Vertex(ArrayUtils.toPrimitive(input.toArray(new Double[0])));
+    }));
+    BagMap<Vertex, Face> v2f = new BagMap<>(new FactoryHashMap<Set<Vertex>, Face>((input) -> {
+      return new Face(input.toArray(new Vertex[0]));
+    }));
+    //TODO OPT This is redoing work already done
+    for (Face f : faces) {
+      v2f.put(f, f.vertices.toArray(new Vertex[0]));
+      for (Vertex v : f.vertices) {
+        vertices.put(v, ArrayUtils.toObject(v.coords));
+      }
+    }
+
+    SecureRandom rand = new SecureRandom();
+
+    
+    
   }
 }

@@ -13,6 +13,7 @@ import com.erhannis.mathnstuff.utils.ListMap;
 import com.erhannis.puzzlegen.structure.Cell;
 import com.erhannis.puzzlegen.structure.Face;
 import com.erhannis.puzzlegen.structure.Vertex;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -261,7 +262,7 @@ public class Phase1CellGeneration {
     for (Face f : faces) {
       v2f.put(f, f.vertices.toArray(new Vertex[0]));
     }
-    
+
     Set<Cell> cells = new HashSet<>();
 
     Function<Set<Vertex>, Vertex[]> orderPair = (vs) -> {
@@ -337,7 +338,7 @@ public class Phase1CellGeneration {
     }
   }
 
-  public static Collection<Cell> generateLSystem(int level) {
+  public static Collection<Face> generatePeanoCurve(int level) {
     ListMap<Double, Vertex> vertices = new ListMap<>(new FactoryHashMap<List<Double>, Vertex>((input) -> {
       return new Vertex(ArrayUtils.toPrimitive(input.toArray(new Double[0])));
     }));
@@ -364,8 +365,10 @@ public class Phase1CellGeneration {
     Holder<Vertex> lastVertex = new Holder<>(null);
 
     HashMap<Character, Runnable> actions = new HashMap<>();
-    actions.put('n', () -> {});
-    actions.put('b', () -> {});
+    actions.put('n', () -> {
+    });
+    actions.put('b', () -> {
+    });
     actions.put('f', () -> {
       //TODO Note that n/s may be backwards, technically
       switch (dir.value) {
@@ -405,7 +408,7 @@ public class Phase1CellGeneration {
     Cell c = new Cell(faces.map.values().toArray(new Face[0]));
     cells.add(c);
 
-    return cells;
+    return faces.map.values();
   }
   
   public static String doLSystem(String init, Map<Character, String> rules, int level) {
