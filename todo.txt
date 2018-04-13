@@ -16,3 +16,7 @@ Lindenmayer Systems
   Alter single-line systems, for making cells
     Take edge with same cell on both sides, turn one A and the other B, propagate until they collide?  Seed whole map, propagate between traces until collision?
   ^Generate
+LSys->puzzle
+  Currently only adds walls - maybe allow removal?
+  Equal-growing paint
+  ^Random-growing paint
