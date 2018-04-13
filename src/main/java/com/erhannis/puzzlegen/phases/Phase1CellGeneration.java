@@ -407,7 +407,7 @@ public class Phase1CellGeneration {
 
     LSystemResult result = new LSystemResult();
     result.walls = new HashSet<Face>(faces.map.values());
-    
+
     // Generate corresponding grid
     Holder<Double> minX = new Holder<>(0.0);
     Holder<Double> minY = new Holder<>(0.0);
@@ -436,6 +436,122 @@ public class Phase1CellGeneration {
     }
 
     result.gridCells = gridCells;
+    return result;
+  }
+
+  public static LSystemResult generateGosperCurve(int level) {
+    ListMap<Double, Vertex> vertices = new ListMap<>(new FactoryHashMap<List<Double>, Vertex>((input) -> {
+      return new Vertex(ArrayUtils.toPrimitive(input.toArray(new Double[0])));
+    }));
+    BagMap<Vertex, Face> faces = new BagMap<>(new FactoryHashMap<Set<Vertex>, Face>((input) -> {
+      return new Face(input.toArray(new Vertex[0]));
+    }));
+
+    //TODO Allow customization
+    HashMap<Character, String> rules = new HashMap<>();
+    rules.put('a', "a-b--b+a++aa+b-");
+    rules.put('b', "+a-bb--b-a++a+b");
+    rules.put('+', "+");
+    rules.put('-', "-");
+    String init = "a";
+    String code = doLSystem(init, rules, level);
+
+    double xf = FACTOR;
+    double yf = xf;
+
+    Holder<Double> x = new Holder<>(0.0);
+    Holder<Double> y = new Holder<>(0.0);
+    Holder<Integer> dir = new Holder<>(0); //n ne e s sw w
+    Holder<Vertex> lastVertex = new Holder<>(null);
+
+    HashMap<Character, Runnable> actions = new HashMap<>();
+    actions.put('a', () -> {
+      //TODO Note that n/s may be backwards, technically
+      switch (dir.value) {
+        case 0: //n
+          y.value += yf;
+          break;
+        case 1: //ne
+          x.value += xf;
+          y.value += yf;
+          break;
+        case 2: //e
+          x.value += xf;
+          break;
+        case 3: //s
+          y.value -= yf;
+          break;
+        case 4: //sw
+          x.value -= xf;
+          y.value -= yf;
+          break;
+        case 5: //w
+          x.value -= xf;
+          break;
+      }
+    });
+    actions.put('b', actions.get('a'));
+    actions.put('+', () -> {
+      dir.value = MeMath.mod(dir.value - 1, 6);
+    });
+    actions.put('-', () -> {
+      dir.value = MeMath.mod(dir.value + 1, 6);
+    });
+
+    // Make faces
+    lastVertex.value = vertices.get(x.value, y.value);
+    code.chars().forEachOrdered(c -> {
+      actions.get((Character) (char) c).run();
+      Vertex thisVertex = vertices.get(x.value, y.value);
+      if (!thisVertex.equals(lastVertex.value)) {
+        faces.get(lastVertex.value, thisVertex);
+        lastVertex.value = thisVertex;
+      }
+    });
+
+    LSystemResult result = new LSystemResult();
+    result.walls = new HashSet<Face>(faces.map.values());
+
+    // Generate corresponding grid
+    for (Vertex v : new HashSet<Vertex>(vertices.map.values())) {
+      for (int d = 0; d < 6; d++) {
+        switch (d) {
+          case 0: //n
+            faces.get(v, vertices.get(v.coords[0], v.coords[1] + yf));
+            break;
+          case 1: //ne
+            faces.get(v, vertices.get(v.coords[0] + xf, v.coords[1] + yf));
+            break;
+          case 2: //e
+            faces.get(v, vertices.get(v.coords[0] + xf, v.coords[1]));
+            break;
+          case 3: //s
+            faces.get(v, vertices.get(v.coords[0], v.coords[1] - yf));
+            break;
+          case 4: //sw
+            faces.get(v, vertices.get(v.coords[0] - xf, v.coords[1] - yf));
+            break;
+          case 5: //w
+            faces.get(v, vertices.get(v.coords[0] - xf, v.coords[1]));
+            break;
+        }
+      }
+    }
+
+    Set<Face> nonStick = new HashSet<>(faces.map.values());
+//    boolean changed;
+//    int i = 0;
+//    do {
+//      System.out.println("Anti-sticking loop " + (i++));
+//      changed = false;
+//      int size = nonStick.size();
+//      nonStick = nonStick.stream().filter(f -> !f.vertices.stream().anyMatch(v -> v.faces.size() == 1)).collect(Collectors.toSet());
+//      if (size != nonStick.size()) {
+//        changed = true;
+//      }
+//    } while (changed);
+
+    result.gridCells = autoCellFaces(nonStick, true);
     return result;
   }
 

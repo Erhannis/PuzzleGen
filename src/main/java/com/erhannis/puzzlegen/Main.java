@@ -8,6 +8,7 @@ package com.erhannis.puzzlegen;
 import com.erhannis.puzzlegen.datagroups.LSystemResult;
 import com.erhannis.puzzlegen.phases.Phase1CellGeneration;
 import com.erhannis.puzzlegen.phases.Phase2Grouping;
+import com.erhannis.puzzlegen.phases.Phase3Transformation;
 import com.erhannis.puzzlegen.phases.Phase4GenSvg;
 import com.erhannis.puzzlegen.structure.Cell;
 import com.erhannis.puzzlegen.structure.Face;
@@ -117,7 +118,8 @@ public class Main {
       //cells = Phase1CellGeneration.generateTriangleBoard(160, 80, true);
       //cells = Phase1CellGeneration.generateHexBoard(120, 80, true);
       //cells = Phase1CellGeneration.generateSierpinski(7, true);
-      LSystemResult lsResult = Phase1CellGeneration.generatePeanoCurve(4);
+      //LSystemResult lsResult = Phase1CellGeneration.generatePeanoCurve(5);
+      LSystemResult lsResult = Phase1CellGeneration.generateGosperCurve(5);
       cells = lsResult.gridCells;
       walls = lsResult.walls;
       System.out.println("Got " + cells.size() + " cells");
@@ -146,6 +148,8 @@ public class Main {
       System.out.println("Got " + groups.size() + " groups");
       System.out.println("Phase 2 " + (System.currentTimeMillis() - t));
 
+      Phase3Transformation.rightTriangleToEquilateralBADIDEA(cells.stream().findAny().get());
+      
       t = System.currentTimeMillis();
       long time = System.currentTimeMillis();
       if (walls != null) {
