@@ -10,6 +10,7 @@ import com.erhannis.puzzlegen.structure.Face;
 import com.erhannis.puzzlegen.structure.Group;
 import com.erhannis.puzzlegen.structure.Vertex;
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.geom.Line2D;
 import java.io.BufferedWriter;
@@ -17,6 +18,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -49,6 +51,23 @@ public class Phase4GenSvg {
       faces.addAll(c.faces);
     });
     // Draw faces
+    drawFaces(g, faces);
+    
+    writeSvg(g, target);
+  }
+  
+  public static void writeFacesToSvg(Collection<Face> faces, File target) throws IOException {
+    SVGGraphics2D g = getSvgGraphics2D();
+    
+    // Draw stuff
+    
+    // Draw faces
+    drawFaces(g, faces);
+    
+    writeSvg(g, target);
+  }
+
+  protected static void drawFaces(Graphics2D g, Collection<Face> faces) throws IOException {
     for (Face f : faces) {
       if (f.vertices.size() != 2) {
         throw new IllegalStateException("This face has " + f.vertices.size() + " vertices; can't render to SVG");
@@ -64,8 +83,6 @@ public class Phase4GenSvg {
       }
       g.draw(new Line2D.Double(v1.coords[0], v1.coords[1], v2.coords[0], v2.coords[1]));
     }
-    
-    writeSvg(g, target);
   }
   
   public static void writeGroupsToSvg(Set<Group> groups, File target, ColorMode colorMode, boolean skipUnassignedBorderFaces) throws IOException {
@@ -143,21 +160,7 @@ public class Phase4GenSvg {
       }
     }
     // Draw faces
-    for (Face f : facesToDraw) {
-      if (f.vertices.size() != 2) {
-        throw new IllegalStateException("This face has " + f.vertices.size() + " vertices; can't render to SVG");
-      }
-      Iterator<Vertex> i = f.vertices.iterator();
-      Vertex v1 = i.next();
-      Vertex v2 = i.next();
-      if (v1.coords.length != 2) {
-        throw new IllegalStateException("This vertex has " + v1.coords.length + " coords; can't render to SVG");
-      }
-      if (v2.coords.length != 2) {
-        throw new IllegalStateException("This vertex has " + v2.coords.length + " coords; can't render to SVG");
-      }
-      g.draw(new Line2D.Double(v1.coords[0], v1.coords[1], v2.coords[0], v2.coords[1]));
-    }
+    drawFaces(g, facesToDraw);
     
     writeSvg(g, target);
   }

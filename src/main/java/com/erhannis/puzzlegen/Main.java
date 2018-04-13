@@ -5,10 +5,12 @@
  */
 package com.erhannis.puzzlegen;
 
+import com.erhannis.puzzlegen.datagroups.LSystemResult;
 import com.erhannis.puzzlegen.phases.Phase1CellGeneration;
 import com.erhannis.puzzlegen.phases.Phase2Grouping;
 import com.erhannis.puzzlegen.phases.Phase4GenSvg;
 import com.erhannis.puzzlegen.structure.Cell;
+import com.erhannis.puzzlegen.structure.Face;
 import com.erhannis.puzzlegen.structure.Group;
 import java.io.File;
 import java.io.IOException;
@@ -52,7 +54,8 @@ public class Main {
     };
     if (args.length > 0) { // Hotwiring to show usage, for now
       try {
-        Collection<Cell> cells;
+        Collection<Cell> cells = null;
+        Collection<Face> walls = null;
         int i = 0;
         String cellType = args[i++];
         int w = Integer.parseInt(args[i++]);
@@ -92,7 +95,7 @@ public class Main {
         System.out.println("Phase 1 " + (System.currentTimeMillis() - t));
 
         t = System.currentTimeMillis();
-        Set<Group> groups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), groupCount, neighborStrictness, resolutionMode);
+        Set<Group> groups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), walls, groupCount, neighborStrictness, resolutionMode);
         System.out.println("Phase 2 " + (System.currentTimeMillis() - t));
 
         t = System.currentTimeMillis();
@@ -108,11 +111,15 @@ public class Main {
       }
     } else {
       long t = System.currentTimeMillis();
-      //Collection<Cell> cells = Phase1CellGeneration.generateSquareBoard(100, 100);
-      //Collection<Cell> cells = Phase1CellGeneration.generateTriangleBoard(160, 80, true);
-      //Collection<Cell> cells = Phase1CellGeneration.generateHexBoard(120, 80, true);
-      //Collection<Cell> cells = Phase1CellGeneration.generateSierpinski(7, true);
-      Collection<Cell> cells = Phase1CellGeneration.generateLSystem(4);
+      Collection<Cell> cells = null;
+      Collection<Face> walls = null;
+      //cells = Phase1CellGeneration.generateSquareBoard(100, 100);
+      //cells = Phase1CellGeneration.generateTriangleBoard(160, 80, true);
+      //cells = Phase1CellGeneration.generateHexBoard(120, 80, true);
+      //cells = Phase1CellGeneration.generateSierpinski(7, true);
+      LSystemResult lsResult = Phase1CellGeneration.generatePeanoCurve(4);
+      cells = lsResult.gridCells;
+      walls = lsResult.walls;
       System.out.println("Got " + cells.size() + " cells");
       System.out.println("Phase 1 " + (System.currentTimeMillis() - t));
 
@@ -121,7 +128,7 @@ public class Main {
       Set<Group> groups = null;
       for (int i = 0; i < 1; i++) {
         System.err.print(i + " ");
-        Set<Group> lGroups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), 1, 1, Phase2Grouping.P2ResolutionMode.MAKE_OWN_GROUP_WITH_MIN_SIZE_20_ELSE_ASSIGN_TO_LEAST_CONTACT_SAVE_BORDER);
+        Set<Group> lGroups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), walls, 100, 3,Phase2Grouping.P2ResolutionMode.MAKE_OWN_GROUP_WITH_MIN_SIZE_20_ELSE_ASSIGN_TO_LEAST_CONTACT_SAVE_BORDER);
         System.err.println("");
         HashSet<Cell> lCells = new HashSet<Cell>();
         for (Group g : lGroups) {
@@ -141,6 +148,9 @@ public class Main {
 
       t = System.currentTimeMillis();
       long time = System.currentTimeMillis();
+      if (walls != null) {
+        Phase4GenSvg.writeFacesToSvg(walls, new File("gen/" + time + "_walls.svg"));
+      }
       Phase4GenSvg.writeGridToSvg(cells.stream().findAny().get(), new File("gen/" + time + "_grid.svg"));
       Phase4GenSvg.writeGroupsToSvg(groups, new File("gen/" + time + "_groups.svg"), Phase4GenSvg.ColorMode.NONE, true);
       Phase4GenSvg.writeGroupsToSvg(groups, new File("gen/" + time + "_groups_colored.svg"), Phase4GenSvg.ColorMode.RANDOM_WITH_ALPHA, true);

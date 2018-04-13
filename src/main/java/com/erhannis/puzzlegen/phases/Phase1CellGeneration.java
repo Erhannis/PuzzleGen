@@ -10,6 +10,7 @@ import com.erhannis.mathnstuff.Holder;
 import com.erhannis.mathnstuff.MeMath;
 import com.erhannis.mathnstuff.utils.BagMap;
 import com.erhannis.mathnstuff.utils.ListMap;
+import com.erhannis.puzzlegen.datagroups.LSystemResult;
 import com.erhannis.puzzlegen.structure.Cell;
 import com.erhannis.puzzlegen.structure.Face;
 import com.erhannis.puzzlegen.structure.Vertex;
@@ -338,7 +339,7 @@ public class Phase1CellGeneration {
     }
   }
 
-  public static Collection<Face> generatePeanoCurve(int level) {
+  public static LSystemResult generatePeanoCurve(int level) {
     ListMap<Double, Vertex> vertices = new ListMap<>(new FactoryHashMap<List<Double>, Vertex>((input) -> {
       return new Vertex(ArrayUtils.toPrimitive(input.toArray(new Double[0])));
     }));
@@ -404,13 +405,40 @@ public class Phase1CellGeneration {
       }
     });
 
-    HashSet<Cell> cells = new HashSet<>();
-    Cell c = new Cell(faces.map.values().toArray(new Face[0]));
-    cells.add(c);
+    LSystemResult result = new LSystemResult();
+    result.walls = new HashSet<Face>(faces.map.values());
+    
+    // Generate corresponding grid
+    Holder<Double> minX = new Holder<>(0.0);
+    Holder<Double> minY = new Holder<>(0.0);
+    Holder<Double> maxX = new Holder<>(0.0);
+    Holder<Double> maxY = new Holder<>(0.0);
+    faces.map.values().stream().flatMap(f -> f.vertices.stream()).distinct().forEach(v -> {
+      synchronized (minX) {
+        minX.value = Math.min(minX.value, v.coords[0]);
+        minY.value = Math.min(minY.value, v.coords[1]);
+        maxX.value = Math.max(maxX.value, v.coords[0]);
+        maxY.value = Math.max(maxY.value, v.coords[1]);
+      }
+    });
+    // I was gonna use the turtle system to draw the grid...but that's kinda stupid inefficient in two ways
+    HashSet<Cell> gridCells = new HashSet<>();
+    for (double curX = minX.value - xf; curX < maxX.value + xf; curX += xf) {
+      for (double curY = minY.value - yf; curY < maxY.value + yf; curY += yf) {
+        Face[] lFaces = new Face[4];
+        lFaces[0] = faces.get(vertices.get(curX, curY), vertices.get(curX + xf, curY));
+        lFaces[1] = faces.get(vertices.get(curX + xf, curY), vertices.get(curX + xf, curY + yf));
+        lFaces[2] = faces.get(vertices.get(curX + xf, curY + yf), vertices.get(curX, curY + yf));
+        lFaces[3] = faces.get(vertices.get(curX, curY + yf), vertices.get(curX, curY));
+        Cell newCell = new Cell(lFaces);
+        gridCells.add(newCell);
+      }
+    }
 
-    return faces.map.values();
+    result.gridCells = gridCells;
+    return result;
   }
-  
+
   public static String doLSystem(String init, Map<Character, String> rules, int level) {
     StringBuilder s = new StringBuilder(init);
     for (int i = 0; i < level; i++) {

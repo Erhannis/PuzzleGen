@@ -65,6 +65,12 @@ public class Cell {
     result.remove(this);
     return result;
   }
+  
+  public static Set<Face> getSharedFaces(Cell a, Cell b) {
+    Set<Face> faces = new HashSet<>(a.faces);
+    faces.retainAll(b.faces);
+    return faces;
+  }
 
   @Override
   public int hashCode() {

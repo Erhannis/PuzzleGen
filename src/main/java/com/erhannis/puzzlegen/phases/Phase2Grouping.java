@@ -38,7 +38,7 @@ public class Phase2Grouping {
 
   private static final int MIN_RESOLUTION_GROUP_SIZE_FOR_MODE = 20;
 
-  public static Set<Group> groupCellsDefault(Cell root, int groupCount, int ignoreSourceNeighborRadius, P2ResolutionMode resolutionMode) {
+  public static Set<Group> groupCellsDefault(Cell root, Collection<Face> walls, int groupCount, int ignoreSourceNeighborRadius, P2ResolutionMode resolutionMode) {
     final int GROUP_COUNT = groupCount;
     SecureRandom rand = new SecureRandom();
 
@@ -80,6 +80,12 @@ public class Phase2Grouping {
       }
       Set<Cell> ignore = ignore0;
       result = result.stream().filter(c2 -> !(c2.getAllNeighbors().stream().filter(c2n -> !ignore.contains(c2n) && !c2n.equals(c)).anyMatch(c2n -> c2g.get(c2n) == c2g.get(c)))).collect(Collectors.toSet()); // Remove if too close to own group, ignoring adj from c
+      // Remove results only accessible through walls
+      if (walls != null) {
+        result = result.stream().filter(c2 -> {
+          return !Cell.getSharedFaces(c, c2).stream().allMatch(f -> walls.contains(f));
+        }).collect(Collectors.toSet());
+      }
       return result;
     };
 
@@ -228,24 +234,24 @@ public class Phase2Grouping {
    * @param forbidSelfAdjacency
    * @return 
    */
-  public static Collection<Cell> splitCellsByPaint(Collection<Face> faces, int groupCount, boolean forbidSelfAdjacency) {
-    ListMap<Double, Vertex> vertices = new ListMap<>(new FactoryHashMap<List<Double>, Vertex>((input) -> {
-      return new Vertex(ArrayUtils.toPrimitive(input.toArray(new Double[0])));
-    }));
-    BagMap<Vertex, Face> v2f = new BagMap<>(new FactoryHashMap<Set<Vertex>, Face>((input) -> {
-      return new Face(input.toArray(new Vertex[0]));
-    }));
-    //TODO OPT This is redoing work already done
-    for (Face f : faces) {
-      v2f.put(f, f.vertices.toArray(new Vertex[0]));
-      for (Vertex v : f.vertices) {
-        vertices.put(v, ArrayUtils.toObject(v.coords));
-      }
-    }
-
-    SecureRandom rand = new SecureRandom();
-
-    
-    
-  }
+//  public static Collection<Cell> splitCellsByPaint(Collection<Face> faces, int groupCount, boolean forbidSelfAdjacency) {
+//    ListMap<Double, Vertex> vertices = new ListMap<>(new FactoryHashMap<List<Double>, Vertex>((input) -> {
+//      return new Vertex(ArrayUtils.toPrimitive(input.toArray(new Double[0])));
+//    }));
+//    BagMap<Vertex, Face> v2f = new BagMap<>(new FactoryHashMap<Set<Vertex>, Face>((input) -> {
+//      return new Face(input.toArray(new Vertex[0]));
+//    }));
+//    //TODO OPT This is redoing work already done
+//    for (Face f : faces) {
+//      v2f.put(f, f.vertices.toArray(new Vertex[0]));
+//      for (Vertex v : f.vertices) {
+//        vertices.put(v, ArrayUtils.toObject(v.coords));
+//      }
+//    }
+//
+//    SecureRandom rand = new SecureRandom();
+//
+//    
+//    
+//  }
 }
