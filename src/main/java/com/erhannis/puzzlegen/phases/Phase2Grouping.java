@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.ArrayUtils;
@@ -226,6 +227,50 @@ public class Phase2Grouping {
     return groups;
   }
 
+  public static Set<Group> absorbSmallGroups(Set<Group> groups, int minSize) {
+    HashMap<Cell, Group> c2g = new HashMap<>();
+    for (Group g : groups) {
+      for (Cell c : g.cells) {
+        c2g.put(c, g);
+      }
+    }
+    
+    Consumer<Group> assignToLeastContact = (group) -> {
+      Set<Face> faces = group.cells.stream().flatMap(c2 -> c2.faces.stream()).collect(Collectors.toSet());
+      FactoryHashMap<Group, Integer> scores = new FactoryHashMap<Group, Integer>(g2 -> 0);
+      boolean hasBorderFace = false;
+      for (Face f : faces) {
+        if (f.cells.size() < 2) {
+          hasBorderFace = true;
+        }
+        for (Cell c2 : f.cells) {
+          Group g2 = c2g.get(c2);
+          if (g2 != null) {
+            scores.put(g2, scores.get(g2) + 1);
+          }
+        }
+      }
+      Group winner;
+      //TODO There was mention of the border, here - reinstate?
+      winner = scores.entrySet().stream().min((a, b) -> Integer.compare(a.getValue(), b.getValue())).get().getKey();
+
+      winner.cells.addAll(group.cells);
+      for (Cell c2 : group.cells) {
+        c2g.put(c2, winner);
+      }
+    };
+
+    ArrayList<Group> newGroups = new ArrayList<>();
+    for (Group g : groups) {
+      if (g.cells.size() < minSize) {
+        assignToLeastContact.accept(g);
+      } else {
+        newGroups.add(g);
+      }
+    }
+    return new HashSet<Group>(newGroups);
+  }
+  
   /**
    * Splatter paint on grid, expand it outward until it hits other paint, at
    * which point create an edge.

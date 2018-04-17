@@ -118,8 +118,9 @@ public class Main {
       //cells = Phase1CellGeneration.generateTriangleBoard(160, 80, true);
       //cells = Phase1CellGeneration.generateHexBoard(120, 80, true);
       //cells = Phase1CellGeneration.generateSierpinski(7, true);
-      //LSystemResult lsResult = Phase1CellGeneration.generatePeanoCurve(5);
-      LSystemResult lsResult = Phase1CellGeneration.generateGosperCurve(5);
+      //LSystemResult lsResult = Phase1CellGeneration.generatePeanoCurve(4);
+      //LSystemResult lsResult = Phase1CellGeneration.generateGosperCurve(5);
+      LSystemResult lsResult = Phase1CellGeneration.generateHilbertCurve(7);
       cells = lsResult.gridCells;
       walls = lsResult.walls;
       System.out.println("Got " + cells.size() + " cells");
@@ -130,7 +131,8 @@ public class Main {
       Set<Group> groups = null;
       for (int i = 0; i < 1; i++) {
         System.err.print(i + " ");
-        Set<Group> lGroups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), walls, 100, 3,Phase2Grouping.P2ResolutionMode.MAKE_OWN_GROUP_WITH_MIN_SIZE_20_ELSE_ASSIGN_TO_LEAST_CONTACT_SAVE_BORDER);
+        Set<Group> lGroups = Phase2Grouping.groupCellsDefault(cells.stream().findAny().get(), walls, 20, 3,Phase2Grouping.P2ResolutionMode.MAKE_OWN_GROUP_WITH_MIN_SIZE_20_ELSE_ASSIGN_TO_LEAST_CONTACT_SAVE_BORDER);
+        lGroups = Phase2Grouping.absorbSmallGroups(lGroups, 40);
         System.err.println("");
         HashSet<Cell> lCells = new HashSet<Cell>();
         for (Group g : lGroups) {
@@ -148,7 +150,7 @@ public class Main {
       System.out.println("Got " + groups.size() + " groups");
       System.out.println("Phase 2 " + (System.currentTimeMillis() - t));
 
-      Phase3Transformation.rightTriangleToEquilateralBADIDEA(cells.stream().findAny().get());
+      //Phase3Transformation.rightTriangleToEquilateralBADIDEA(cells.stream().findAny().get());
       
       t = System.currentTimeMillis();
       long time = System.currentTimeMillis();

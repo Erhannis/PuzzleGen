@@ -439,6 +439,106 @@ public class Phase1CellGeneration {
     return result;
   }
 
+  public static LSystemResult generateHilbertCurve(int level) {
+    ListMap<Double, Vertex> vertices = new ListMap<>(new FactoryHashMap<List<Double>, Vertex>((input) -> {
+      return new Vertex(ArrayUtils.toPrimitive(input.toArray(new Double[0])));
+    }));
+    BagMap<Vertex, Face> faces = new BagMap<>(new FactoryHashMap<Set<Vertex>, Face>((input) -> {
+      return new Face(input.toArray(new Vertex[0]));
+    }));
+
+    //TODO Allow customization
+    HashMap<Character, String> rules = new HashMap<>();
+    rules.put('a', "-bf+afa+fb-");
+    rules.put('b', "+af-bfb-fa+");
+    rules.put('f', "f");
+    rules.put('+', "+");
+    rules.put('-', "-");
+    String init = "a";
+    String code = doLSystem(init, rules, level);
+
+    double xf = FACTOR;
+    double yf = xf;
+
+    Holder<Double> x = new Holder<>(0.0);
+    Holder<Double> y = new Holder<>(0.0);
+    Holder<Integer> dir = new Holder<>(0); //n e s w
+    Holder<Vertex> lastVertex = new Holder<>(null);
+
+    HashMap<Character, Runnable> actions = new HashMap<>();
+    actions.put('a', () -> {
+    });
+    actions.put('b', () -> {
+    });
+    actions.put('f', () -> {
+      //TODO Note that n/s may be backwards, technically
+      switch (dir.value) {
+        case 0: //n
+          y.value += yf;
+          break;
+        case 1: //e
+          x.value += xf;
+          break;
+        case 2: //s
+          y.value -= yf;
+          break;
+        case 3: //w
+          x.value -= xf;
+          break;
+      }
+    });
+    actions.put('+', () -> {
+      dir.value = MeMath.mod(dir.value - 1, 4);
+    });
+    actions.put('-', () -> {
+      dir.value = MeMath.mod(dir.value + 1, 4);
+    });
+
+    // Make faces
+    lastVertex.value = vertices.get(x.value, y.value);
+    code.chars().forEachOrdered(c -> {
+      actions.get((Character) (char) c).run();
+      Vertex thisVertex = vertices.get(x.value, y.value);
+      if (!thisVertex.equals(lastVertex.value)) {
+        faces.get(lastVertex.value, thisVertex);
+        lastVertex.value = thisVertex;
+      }
+    });
+
+    LSystemResult result = new LSystemResult();
+    result.walls = new HashSet<Face>(faces.map.values());
+
+    // Generate corresponding grid
+    Holder<Double> minX = new Holder<>(0.0);
+    Holder<Double> minY = new Holder<>(0.0);
+    Holder<Double> maxX = new Holder<>(0.0);
+    Holder<Double> maxY = new Holder<>(0.0);
+    faces.map.values().stream().flatMap(f -> f.vertices.stream()).distinct().forEach(v -> {
+      synchronized (minX) {
+        minX.value = Math.min(minX.value, v.coords[0]);
+        minY.value = Math.min(minY.value, v.coords[1]);
+        maxX.value = Math.max(maxX.value, v.coords[0]);
+        maxY.value = Math.max(maxY.value, v.coords[1]);
+      }
+    });
+    // I was gonna use the turtle system to draw the grid...but that's kinda stupid inefficient in two ways
+    HashSet<Cell> gridCells = new HashSet<>();
+    for (double curX = minX.value - xf; curX < maxX.value + xf; curX += xf) {
+      for (double curY = minY.value - yf; curY < maxY.value + yf; curY += yf) {
+        Face[] lFaces = new Face[4];
+        lFaces[0] = faces.get(vertices.get(curX, curY), vertices.get(curX + xf, curY));
+        lFaces[1] = faces.get(vertices.get(curX + xf, curY), vertices.get(curX + xf, curY + yf));
+        lFaces[2] = faces.get(vertices.get(curX + xf, curY + yf), vertices.get(curX, curY + yf));
+        lFaces[3] = faces.get(vertices.get(curX, curY + yf), vertices.get(curX, curY));
+        Cell newCell = new Cell(lFaces);
+        gridCells.add(newCell);
+      }
+    }
+
+    result.gridCells = gridCells;
+    return result;
+  }
+  
   public static LSystemResult generateGosperCurve(int level) {
     ListMap<Double, Vertex> vertices = new ListMap<>(new FactoryHashMap<List<Double>, Vertex>((input) -> {
       return new Vertex(ArrayUtils.toPrimitive(input.toArray(new Double[0])));
