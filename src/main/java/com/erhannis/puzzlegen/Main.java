@@ -112,17 +112,24 @@ public class Main {
       }
     } else {
       long t = System.currentTimeMillis();
+      LSystemResult lsResult = null;
       Collection<Cell> cells = null;
       Collection<Face> walls = null;
+      
+      // Puzzle types, one per line - uncomment exactly one
+      
       //cells = Phase1CellGeneration.generateSquareBoard(100, 100);
       //cells = Phase1CellGeneration.generateTriangleBoard(160, 80, true);
       //cells = Phase1CellGeneration.generateHexBoard(120, 80, true);
-      //cells = Phase1CellGeneration.generateSierpinski(7, true);
-      //LSystemResult lsResult = Phase1CellGeneration.generatePeanoCurve(4);
-      //LSystemResult lsResult = Phase1CellGeneration.generateGosperCurve(5);
-      LSystemResult lsResult = Phase1CellGeneration.generateHilbertCurve(7);
-      cells = lsResult.gridCells;
-      walls = lsResult.walls;
+      cells = Phase1CellGeneration.generateSierpinski(7, true);
+      //lsResult = Phase1CellGeneration.generatePeanoCurve(4);
+      //lsResult = Phase1CellGeneration.generateGosperCurve(5);
+      //lsResult = Phase1CellGeneration.generateHilbertCurve(7);
+      
+      if (lsResult != null) {
+        cells = lsResult.gridCells;
+        walls = lsResult.walls;
+      }
       System.out.println("Got " + cells.size() + " cells");
       System.out.println("Phase 1 " + (System.currentTimeMillis() - t));
 
@@ -150,7 +157,7 @@ public class Main {
       System.out.println("Got " + groups.size() + " groups");
       System.out.println("Phase 2 " + (System.currentTimeMillis() - t));
 
-      //Phase3Transformation.rightTriangleToEquilateralBADIDEA(cells.stream().findAny().get());
+      Phase3Transformation.rightTriangleToEquilateralBADIDEA(cells.stream().findAny().get());
       
       t = System.currentTimeMillis();
       long time = System.currentTimeMillis();
